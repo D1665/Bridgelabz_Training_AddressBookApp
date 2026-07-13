@@ -27,4 +27,13 @@ export class Person {
         this.phone = phone;
         this.email = email;
     }
+
+    getFullName(): string {
+        return `${this.firstName} ${this.lastName}`.trim();
+    }
+
+    equals(other: Person): boolean {
+        if (!other) return false;
+        return this.getFullName().toLowerCase() === other.getFullName().toLowerCase();
+    }
 }

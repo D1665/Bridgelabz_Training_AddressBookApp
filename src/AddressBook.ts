@@ -10,13 +10,20 @@ export class AddressBook {
     }
 
     addPerson(person: Person): boolean {
+        if (this.isDuplicate(person)) {
+            return false;
+        }
         this.contacts.push(person);
         return true;
     }
 
+    isDuplicate(person: Person): boolean {
+        return this.contacts.some(c => c.equals(person));
+    }
+
     findByName(name: string): Person | undefined {
         return this.contacts.find(
-            c => `${c.firstName} ${c.lastName}`.toLowerCase() === name.toLowerCase()
+            c => c.getFullName().toLowerCase() === name.toLowerCase()
         );
     }
 
@@ -36,7 +43,7 @@ export class AddressBook {
 
     deletePerson(name: string): boolean {
         const idx = this.contacts.findIndex(
-            c => `${c.firstName} ${c.lastName}`.toLowerCase() === name.toLowerCase()
+            c => c.getFullName().toLowerCase() === name.toLowerCase()
         );
         if (idx === -1) return false;
         this.contacts.splice(idx, 1);

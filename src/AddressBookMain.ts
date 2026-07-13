@@ -81,8 +81,12 @@ function promptForPerson(): Person {
 function addContact() {
     if (!requireCurrentBook()) return;
     const person = promptForPerson();
-    currentBook!.addPerson(person);
-    console.log("Contact added.");
+    const added = currentBook!.addPerson(person);
+    if (added) {
+        console.log("Contact added.");
+    } else {
+        console.log(`A contact named "${person.getFullName()}" already exists, skipping (no duplicates allowed).`);
+    }
 }
 
 function addMultipleContacts() {
@@ -93,6 +97,8 @@ function addMultipleContacts() {
         const person = promptForPerson();
         if (currentBook!.addPerson(person)) {
             added++;
+        } else {
+            console.log(`Skipped duplicate: ${person.getFullName()}`);
         }
         addMore = readlineSync.keyInYNStrict("Add another contact?");
     }
@@ -143,7 +149,7 @@ function viewAllContacts() {
     console.log(`\n${currentBook!.name} - ${contacts.length} contact(s)`);
     contacts.forEach((p, i) => {
         console.log(`\n#${i + 1}`);
-        console.log(`Name: ${p.firstName} ${p.lastName}`);
+        console.log(`Name: ${p.getFullName()}`);
         console.log(`Address: ${p.address}, ${p.city}, ${p.state} - ${p.zip}`);
         console.log(`Phone: ${p.phone}, Email: ${p.email}`);
     });
