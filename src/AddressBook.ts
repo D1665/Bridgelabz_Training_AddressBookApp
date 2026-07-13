@@ -1,9 +1,11 @@
 import { Person } from "./Person";
 
 export class AddressBook {
+    name: string;
     private contacts: Person[];
 
-    constructor() {
+    constructor(name: string) {
+        this.name = name;
         this.contacts = [];
     }
 
@@ -32,7 +34,6 @@ export class AddressBook {
         return true;
     }
 
-    // UC4 - delete contact
     deletePerson(name: string): boolean {
         const idx = this.contacts.findIndex(
             c => `${c.firstName} ${c.lastName}`.toLowerCase() === name.toLowerCase()

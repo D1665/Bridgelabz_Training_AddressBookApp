@@ -2,7 +2,8 @@ import * as readlineSync from "readline-sync";
 import { Person } from "./Person";
 import { AddressBook } from "./AddressBook";
 
-const addressBook = new AddressBook();
+const addressBooks: Map<string, AddressBook> = new Map();
+let currentBook: AddressBook | null = null;
 
 function printWelcome() {
     console.log("====================================");
@@ -12,12 +13,57 @@ function printWelcome() {
 
 function printMenu() {
     console.log("\n--- MENU ---");
-    console.log("1. Add a Contact");
-    console.log("2. View All Contacts");
-    console.log("3. Edit a Contact");
-    console.log("4. Delete a Contact");
-    console.log("5. Add Multiple Contacts");
+    console.log("1. Create a new Address Book");
+    console.log("2. Select an Address Book");
+    console.log("3. Add a Contact");
+    console.log("4. Add Multiple Contacts");
+    console.log("5. Edit a Contact");
+    console.log("6. Delete a Contact");
+    console.log("7. View All Contacts");
     console.log("0. Exit");
+}
+
+function requireCurrentBook(): boolean {
+    if (!currentBook) {
+        console.log("No address book selected yet. Create or select one first (option 1 or 2).");
+        return false;
+    }
+    return true;
+}
+
+function createAddressBook() {
+    const name = readlineSync.question("Enter a name for the new Address Book: ").trim();
+    if (!name) {
+        console.log("Name can't be empty.");
+        return;
+    }
+    if (addressBooks.has(name)) {
+        console.log("An address book with that name already exists, pick another name.");
+        return;
+    }
+    const book = new AddressBook(name);
+    addressBooks.set(name, book);
+    currentBook = book;
+    console.log(`Created and selected Address Book "${name}"`);
+}
+
+function selectAddressBook() {
+    if (addressBooks.size === 0) {
+        console.log("There are no address books yet. Create one first.");
+        return;
+    }
+    console.log("Available Address Books:");
+    for (const bookName of addressBooks.keys()) {
+        console.log(" - " + bookName);
+    }
+    const name = readlineSync.question("Which one do you want to select? ").trim();
+    const book = addressBooks.get(name);
+    if (!book) {
+        console.log("Couldn't find an address book with that name.");
+        return;
+    }
+    currentBook = book;
+    console.log(`Selected "${name}"`);
 }
 
 function promptForPerson(): Person {
@@ -33,42 +79,30 @@ function promptForPerson(): Person {
 }
 
 function addContact() {
+    if (!requireCurrentBook()) return;
     const person = promptForPerson();
-    addressBook.addPerson(person);
+    currentBook!.addPerson(person);
     console.log("Contact added.");
 }
 
 function addMultipleContacts() {
+    if (!requireCurrentBook()) return;
     let addMore = true;
     let added = 0;
     while (addMore) {
-        console.log(`\nEnter details for contact #${added + 1}:`);
         const person = promptForPerson();
-        if (addressBook.addPerson(person)) {
+        if (currentBook!.addPerson(person)) {
             added++;
         }
         addMore = readlineSync.keyInYNStrict("Add another contact?");
     }
-    console.log(`\nDone. Added ${added} contact(s).`);
-}
-
-function viewAllContacts() {
-    const contacts = addressBook.getAll();
-    if (contacts.length === 0) {
-        console.log("Address book is empty.");
-        return;
-    }
-    contacts.forEach((p, i) => {
-        console.log(`\n#${i + 1}`);
-        console.log(`Name: ${p.firstName} ${p.lastName}`);
-        console.log(`Address: ${p.address}, ${p.city}, ${p.state} - ${p.zip}`);
-        console.log(`Phone: ${p.phone}, Email: ${p.email}`);
-    });
+    console.log(`Done. Added ${added} contact(s).`);
 }
 
 function editContact() {
+    if (!requireCurrentBook()) return;
     const name = readlineSync.question("Enter the full name of the contact to edit: ").trim();
-    const person = addressBook.findByName(name);
+    const person = currentBook!.findByName(name);
     if (!person) {
         console.log("No contact found with that name.");
         return;
@@ -81,7 +115,7 @@ function editContact() {
     const phone = readlineSync.question(`Phone [${person.phone}]: `).trim();
     const email = readlineSync.question(`Email [${person.email}]: `).trim();
 
-    addressBook.editPerson(name, {
+    currentBook!.editPerson(name, {
         address: address || undefined,
         city: city || undefined,
         state: state || undefined,
@@ -93,9 +127,26 @@ function editContact() {
 }
 
 function deleteContact() {
+    if (!requireCurrentBook()) return;
     const name = readlineSync.question("Enter the full name of the contact to delete: ").trim();
-    const deleted = addressBook.deletePerson(name);
+    const deleted = currentBook!.deletePerson(name);
     console.log(deleted ? "Deleted." : "Couldn't find that contact.");
+}
+
+function viewAllContacts() {
+    if (!requireCurrentBook()) return;
+    const contacts = currentBook!.getAll();
+    if (contacts.length === 0) {
+        console.log("Address book is empty.");
+        return;
+    }
+    console.log(`\n${currentBook!.name} - ${contacts.length} contact(s)`);
+    contacts.forEach((p, i) => {
+        console.log(`\n#${i + 1}`);
+        console.log(`Name: ${p.firstName} ${p.lastName}`);
+        console.log(`Address: ${p.address}, ${p.city}, ${p.state} - ${p.zip}`);
+        console.log(`Phone: ${p.phone}, Email: ${p.email}`);
+    });
 }
 
 function main() {
@@ -105,11 +156,13 @@ function main() {
         printMenu();
         const choice = readlineSync.question("\nChoose an option: ").trim();
         switch (choice) {
-            case "1": addContact(); break;
-            case "2": viewAllContacts(); break;
-            case "3": editContact(); break;
-            case "4": deleteContact(); break;
-            case "5": addMultipleContacts(); break;
+            case "1": createAddressBook(); break;
+            case "2": selectAddressBook(); break;
+            case "3": addContact(); break;
+            case "4": addMultipleContacts(); break;
+            case "5": editContact(); break;
+            case "6": deleteContact(); break;
+            case "7": viewAllContacts(); break;
             case "0":
                 running = false;
                 console.log("Bye!");
