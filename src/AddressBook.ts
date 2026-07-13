@@ -54,7 +54,6 @@ export class AddressBook {
         return [...this.contacts];
     }
 
-    // UC8 - search across city or state
     searchByCity(city: string): Person[] {
         return this.contacts.filter(
             c => c.city.toLowerCase() === city.toLowerCase()
@@ -65,5 +64,26 @@ export class AddressBook {
         return this.contacts.filter(
             c => c.state.toLowerCase() === state.toLowerCase()
         );
+    }
+
+    // UC9 - view persons grouped by City or State
+    groupByCity(): Map<string, Person[]> {
+        const map = new Map<string, Person[]>();
+        for (const c of this.contacts) {
+            const key = c.city || "(unknown)";
+            if (!map.has(key)) map.set(key, []);
+            map.get(key)!.push(c);
+        }
+        return map;
+    }
+
+    groupByState(): Map<string, Person[]> {
+        const map = new Map<string, Person[]>();
+        for (const c of this.contacts) {
+            const key = c.state || "(unknown)";
+            if (!map.has(key)) map.set(key, []);
+            map.get(key)!.push(c);
+        }
+        return map;
     }
 }

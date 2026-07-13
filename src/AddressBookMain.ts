@@ -21,6 +21,7 @@ function printMenu() {
     console.log("6. Delete a Contact");
     console.log("7. View All Contacts");
     console.log("8. Search by City / State");
+    console.log("9. View Persons Grouped by City / State");
     console.log("0. Exit");
 }
 
@@ -195,6 +196,17 @@ function searchAcrossAllBooks() {
     if (!found) console.log("No matches in any address book.");
 }
 
+function viewGrouped() {
+    if (!requireCurrentBook()) return;
+    const type = readlineSync.question("Group by (city/state)? ").trim().toLowerCase();
+    const map = type === "state" ? currentBook!.groupByState() : currentBook!.groupByCity();
+
+    for (const [key, people] of map) {
+        console.log(`\n${key} (${people.length}):`);
+        people.forEach(p => console.log("  - " + p.getFullName()));
+    }
+}
+
 function main() {
     printWelcome();
     let running = true;
@@ -215,6 +227,7 @@ function main() {
                 else searchByCityOrState();
                 break;
             }
+            case "9": viewGrouped(); break;
             case "0":
                 running = false;
                 console.log("Bye!");
