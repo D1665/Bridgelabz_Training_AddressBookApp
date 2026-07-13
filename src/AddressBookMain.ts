@@ -14,6 +14,7 @@ function printMenu() {
     console.log("\n--- MENU ---");
     console.log("1. Add a Contact");
     console.log("2. View All Contacts");
+    console.log("3. Edit a Contact");
     console.log("0. Exit");
 }
 
@@ -32,7 +33,7 @@ function promptForPerson(): Person {
 function addContact() {
     const person = promptForPerson();
     addressBook.addPerson(person);
-    console.log("Contact added successfully.");
+    console.log("Contact added.");
 }
 
 function viewAllContacts() {
@@ -49,6 +50,32 @@ function viewAllContacts() {
     });
 }
 
+function editContact() {
+    const name = readlineSync.question("Enter the full name of the contact to edit: ").trim();
+    const person = addressBook.findByName(name);
+    if (!person) {
+        console.log("No contact found with that name.");
+        return;
+    }
+    console.log("Leave a field blank to keep it unchanged.");
+    const address = readlineSync.question(`Address [${person.address}]: `).trim();
+    const city = readlineSync.question(`City [${person.city}]: `).trim();
+    const state = readlineSync.question(`State [${person.state}]: `).trim();
+    const zip = readlineSync.question(`Zip [${person.zip}]: `).trim();
+    const phone = readlineSync.question(`Phone [${person.phone}]: `).trim();
+    const email = readlineSync.question(`Email [${person.email}]: `).trim();
+
+    addressBook.editPerson(name, {
+        address: address || undefined,
+        city: city || undefined,
+        state: state || undefined,
+        zip: zip || undefined,
+        phone: phone || undefined,
+        email: email || undefined
+    });
+    console.log("Contact updated.");
+}
+
 function main() {
     printWelcome();
     let running = true;
@@ -58,6 +85,7 @@ function main() {
         switch (choice) {
             case "1": addContact(); break;
             case "2": viewAllContacts(); break;
+            case "3": editContact(); break;
             case "0":
                 running = false;
                 console.log("Bye!");
