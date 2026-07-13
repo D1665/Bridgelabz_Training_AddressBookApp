@@ -16,6 +16,7 @@ function printMenu() {
     console.log("2. View All Contacts");
     console.log("3. Edit a Contact");
     console.log("4. Delete a Contact");
+    console.log("5. Add Multiple Contacts");
     console.log("0. Exit");
 }
 
@@ -35,6 +36,20 @@ function addContact() {
     const person = promptForPerson();
     addressBook.addPerson(person);
     console.log("Contact added.");
+}
+
+function addMultipleContacts() {
+    let addMore = true;
+    let added = 0;
+    while (addMore) {
+        console.log(`\nEnter details for contact #${added + 1}:`);
+        const person = promptForPerson();
+        if (addressBook.addPerson(person)) {
+            added++;
+        }
+        addMore = readlineSync.keyInYNStrict("Add another contact?");
+    }
+    console.log(`\nDone. Added ${added} contact(s).`);
 }
 
 function viewAllContacts() {
@@ -80,7 +95,7 @@ function editContact() {
 function deleteContact() {
     const name = readlineSync.question("Enter the full name of the contact to delete: ").trim();
     const deleted = addressBook.deletePerson(name);
-    console.log(deleted ? "Deleted successfully." : "Couldn't find that contact.");
+    console.log(deleted ? "Deleted." : "Couldn't find that contact.");
 }
 
 function main() {
@@ -94,6 +109,7 @@ function main() {
             case "2": viewAllContacts(); break;
             case "3": editContact(); break;
             case "4": deleteContact(); break;
+            case "5": addMultipleContacts(); break;
             case "0":
                 running = false;
                 console.log("Bye!");
