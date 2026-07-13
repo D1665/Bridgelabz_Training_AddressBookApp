@@ -24,6 +24,7 @@ function printMenu() {
     console.log("9. View Persons Grouped by City / State");
     console.log("10. Count Persons by City / State");
     console.log("11. Sort by Name");
+    console.log("12. Sort by City / State / Zip");
     console.log("0. Exit");
 }
 
@@ -109,7 +110,6 @@ function addMultipleContacts() {
     console.log(`Done. Added ${added} contact(s).`);
 }
 
-// Option 7 uses the toString() method for printing contacts
 function viewAllContacts() {
     if (!requireCurrentBook()) return;
     const contacts = currentBook!.getAll();
@@ -218,6 +218,18 @@ function sortByName() {
     viewAllContacts();
 }
 
+function sortByField() {
+    if (!requireCurrentBook()) return;
+    const field = readlineSync.question("Sort by (city/state/zip): ").trim().toLowerCase();
+    if (field !== "city" && field !== "state" && field !== "zip") {
+        console.log("Not a valid field.");
+        return;
+    }
+    currentBook!.sortBy(field as "city" | "state" | "zip");
+    console.log(`Sorted by ${field}.`);
+    viewAllContacts();
+}
+
 function main() {
     printWelcome();
     let running = true;
@@ -241,6 +253,7 @@ function main() {
             case "9": viewGrouped(); break;
             case "10": countByCityOrState(); break;
             case "11": sortByName(); break;
+            case "12": sortByField(); break;
             case "0":
                 running = false;
                 console.log("Bye!");

@@ -98,10 +98,20 @@ export class AddressBook {
         ).length;
     }
 
-    // UC11 - sort alphabetically by name
     sortByName(): void {
         this.contacts.sort((a, b) =>
             a.getFullName().localeCompare(b.getFullName())
         );
+    }
+
+    // UC12 - sort by city / state / zip
+    sortBy(field: "city" | "state" | "zip"): void {
+        this.contacts.sort((a, b) => {
+            const valA = a[field].toLowerCase();
+            const valB = b[field].toLowerCase();
+            if (valA < valB) return -1;
+            if (valA > valB) return 1;
+            return 0;
+        });
     }
 }
