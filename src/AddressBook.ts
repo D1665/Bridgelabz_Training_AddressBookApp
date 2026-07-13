@@ -66,7 +66,6 @@ export class AddressBook {
         );
     }
 
-    // UC9 - view persons grouped by City or State
     groupByCity(): Map<string, Person[]> {
         const map = new Map<string, Person[]>();
         for (const c of this.contacts) {
@@ -85,5 +84,18 @@ export class AddressBook {
             map.get(key)!.push(c);
         }
         return map;
+    }
+
+    // UC10 - count by city or state
+    countByCity(city: string): number {
+        return this.contacts.filter(
+            c => c.city.toLowerCase() === city.toLowerCase()
+        ).length;
+    }
+
+    countByState(state: string): number {
+        return this.contacts.filter(
+            c => c.state.toLowerCase() === state.toLowerCase()
+        ).length;
     }
 }

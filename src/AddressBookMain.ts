@@ -22,6 +22,7 @@ function printMenu() {
     console.log("7. View All Contacts");
     console.log("8. Search by City / State");
     console.log("9. View Persons Grouped by City / State");
+    console.log("10. Count Persons by City / State");
     console.log("0. Exit");
 }
 
@@ -207,6 +208,15 @@ function viewGrouped() {
     }
 }
 
+function countByCityOrState() {
+    if (!requireCurrentBook()) return;
+    const type = readlineSync.question("Count by (city/state)? ").trim().toLowerCase();
+    const value = readlineSync.question("Enter value: ").trim();
+    const count =
+        type === "state" ? currentBook!.countByState(value) : currentBook!.countByCity(value);
+    console.log(`Count: ${count}`);
+}
+
 function main() {
     printWelcome();
     let running = true;
@@ -228,6 +238,7 @@ function main() {
                 break;
             }
             case "9": viewGrouped(); break;
+            case "10": countByCityOrState(); break;
             case "0":
                 running = false;
                 console.log("Bye!");
