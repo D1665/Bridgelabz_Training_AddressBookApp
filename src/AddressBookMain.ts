@@ -15,6 +15,7 @@ function printMenu() {
     console.log("1. Add a Contact");
     console.log("2. View All Contacts");
     console.log("3. Edit a Contact");
+    console.log("4. Delete a Contact");
     console.log("0. Exit");
 }
 
@@ -76,6 +77,12 @@ function editContact() {
     console.log("Contact updated.");
 }
 
+function deleteContact() {
+    const name = readlineSync.question("Enter the full name of the contact to delete: ").trim();
+    const deleted = addressBook.deletePerson(name);
+    console.log(deleted ? "Deleted successfully." : "Couldn't find that contact.");
+}
+
 function main() {
     printWelcome();
     let running = true;
@@ -86,6 +93,7 @@ function main() {
             case "1": addContact(); break;
             case "2": viewAllContacts(); break;
             case "3": editContact(); break;
+            case "4": deleteContact(); break;
             case "0":
                 running = false;
                 console.log("Bye!");

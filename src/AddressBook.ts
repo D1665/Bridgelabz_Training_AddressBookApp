@@ -18,7 +18,6 @@ export class AddressBook {
         );
     }
 
-    // UC3 - edit an existing contact
     editPerson(name: string, updated: Partial<Person>): boolean {
         const person = this.findByName(name);
         if (!person) return false;
@@ -30,6 +29,16 @@ export class AddressBook {
         if (updated.phone !== undefined) person.phone = updated.phone;
         if (updated.email !== undefined) person.email = updated.email;
 
+        return true;
+    }
+
+    // UC4 - delete contact
+    deletePerson(name: string): boolean {
+        const idx = this.contacts.findIndex(
+            c => `${c.firstName} ${c.lastName}`.toLowerCase() === name.toLowerCase()
+        );
+        if (idx === -1) return false;
+        this.contacts.splice(idx, 1);
         return true;
     }
 
