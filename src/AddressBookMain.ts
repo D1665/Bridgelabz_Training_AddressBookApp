@@ -20,6 +20,7 @@ function printMenu() {
     console.log("5. Edit a Contact");
     console.log("6. Delete a Contact");
     console.log("7. View All Contacts");
+    console.log("8. Search by City / State");
     console.log("0. Exit");
 }
 
@@ -155,6 +156,45 @@ function viewAllContacts() {
     });
 }
 
+function searchByCityOrState() {
+    if (!requireCurrentBook()) return;
+    const type = readlineSync.question("Search by (city/state)? ").trim().toLowerCase();
+    const value = readlineSync.question("Enter value: ").trim();
+
+    const results =
+        type === "state"
+            ? currentBook!.searchByState(value)
+            : currentBook!.searchByCity(value);
+
+    if (results.length === 0) {
+        console.log("No matches found.");
+        return;
+    }
+    results.forEach(p => {
+        console.log(`\nName: ${p.getFullName()}`);
+        console.log(`Address: ${p.address}, ${p.city}, ${p.state} - ${p.zip}`);
+        console.log(`Phone: ${p.phone}, Email: ${p.email}`);
+    });
+}
+
+function searchAcrossAllBooks() {
+    const type = readlineSync.question("Search ACROSS ALL books by (city/state)? ").trim().toLowerCase();
+    const value = readlineSync.question("Enter value: ").trim();
+
+    let found = false;
+    for (const [name, book] of addressBooks) {
+        const results = type === "state" ? book.searchByState(value) : book.searchByCity(value);
+        if (results.length > 0) {
+            found = true;
+            console.log(`\nIn "${name}":`);
+            results.forEach(p => {
+                console.log(`  - ${p.getFullName()} (${p.city}, ${p.state})`);
+            });
+        }
+    }
+    if (!found) console.log("No matches in any address book.");
+}
+
 function main() {
     printWelcome();
     let running = true;
@@ -169,6 +209,12 @@ function main() {
             case "5": editContact(); break;
             case "6": deleteContact(); break;
             case "7": viewAllContacts(); break;
+            case "8": {
+                const scope = readlineSync.question("Search current book only or all books? (current/all): ").trim().toLowerCase();
+                if (scope === "all") searchAcrossAllBooks();
+                else searchByCityOrState();
+                break;
+            }
             case "0":
                 running = false;
                 console.log("Bye!");

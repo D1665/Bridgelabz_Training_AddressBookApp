@@ -53,4 +53,17 @@ export class AddressBook {
     getAll(): Person[] {
         return [...this.contacts];
     }
+
+    // UC8 - search across city or state
+    searchByCity(city: string): Person[] {
+        return this.contacts.filter(
+            c => c.city.toLowerCase() === city.toLowerCase()
+        );
+    }
+
+    searchByState(state: string): Person[] {
+        return this.contacts.filter(
+            c => c.state.toLowerCase() === state.toLowerCase()
+        );
+    }
 }
