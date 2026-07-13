@@ -23,6 +23,7 @@ function printMenu() {
     console.log("8. Search by City / State");
     console.log("9. View Persons Grouped by City / State");
     console.log("10. Count Persons by City / State");
+    console.log("11. Sort by Name");
     console.log("0. Exit");
 }
 
@@ -108,6 +109,21 @@ function addMultipleContacts() {
     console.log(`Done. Added ${added} contact(s).`);
 }
 
+// Option 7 uses the toString() method for printing contacts
+function viewAllContacts() {
+    if (!requireCurrentBook()) return;
+    const contacts = currentBook!.getAll();
+    if (contacts.length === 0) {
+        console.log("Address book is empty.");
+        return;
+    }
+    console.log(`\n${currentBook!.name} - ${contacts.length} contact(s)`);
+    contacts.forEach((p, i) => {
+        console.log(`\n#${i + 1}`);
+        console.log(p.toString());
+    });
+}
+
 function editContact() {
     if (!requireCurrentBook()) return;
     const name = readlineSync.question("Enter the full name of the contact to edit: ").trim();
@@ -142,22 +158,6 @@ function deleteContact() {
     console.log(deleted ? "Deleted." : "Couldn't find that contact.");
 }
 
-function viewAllContacts() {
-    if (!requireCurrentBook()) return;
-    const contacts = currentBook!.getAll();
-    if (contacts.length === 0) {
-        console.log("Address book is empty.");
-        return;
-    }
-    console.log(`\n${currentBook!.name} - ${contacts.length} contact(s)`);
-    contacts.forEach((p, i) => {
-        console.log(`\n#${i + 1}`);
-        console.log(`Name: ${p.getFullName()}`);
-        console.log(`Address: ${p.address}, ${p.city}, ${p.state} - ${p.zip}`);
-        console.log(`Phone: ${p.phone}, Email: ${p.email}`);
-    });
-}
-
 function searchByCityOrState() {
     if (!requireCurrentBook()) return;
     const type = readlineSync.question("Search by (city/state)? ").trim().toLowerCase();
@@ -172,11 +172,7 @@ function searchByCityOrState() {
         console.log("No matches found.");
         return;
     }
-    results.forEach(p => {
-        console.log(`\nName: ${p.getFullName()}`);
-        console.log(`Address: ${p.address}, ${p.city}, ${p.state} - ${p.zip}`);
-        console.log(`Phone: ${p.phone}, Email: ${p.email}`);
-    });
+    results.forEach(p => console.log("\n" + p.toString()));
 }
 
 function searchAcrossAllBooks() {
@@ -189,9 +185,7 @@ function searchAcrossAllBooks() {
         if (results.length > 0) {
             found = true;
             console.log(`\nIn "${name}":`);
-            results.forEach(p => {
-                console.log(`  - ${p.getFullName()} (${p.city}, ${p.state})`);
-            });
+            results.forEach(p => console.log(p.toString()));
         }
     }
     if (!found) console.log("No matches in any address book.");
@@ -217,6 +211,13 @@ function countByCityOrState() {
     console.log(`Count: ${count}`);
 }
 
+function sortByName() {
+    if (!requireCurrentBook()) return;
+    currentBook!.sortByName();
+    console.log("Sorted by name.");
+    viewAllContacts();
+}
+
 function main() {
     printWelcome();
     let running = true;
@@ -239,6 +240,7 @@ function main() {
             }
             case "9": viewGrouped(); break;
             case "10": countByCityOrState(); break;
+            case "11": sortByName(); break;
             case "0":
                 running = false;
                 console.log("Bye!");

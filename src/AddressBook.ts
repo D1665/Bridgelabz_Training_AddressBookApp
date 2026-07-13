@@ -86,7 +86,6 @@ export class AddressBook {
         return map;
     }
 
-    // UC10 - count by city or state
     countByCity(city: string): number {
         return this.contacts.filter(
             c => c.city.toLowerCase() === city.toLowerCase()
@@ -97,5 +96,12 @@ export class AddressBook {
         return this.contacts.filter(
             c => c.state.toLowerCase() === state.toLowerCase()
         ).length;
+    }
+
+    // UC11 - sort alphabetically by name
+    sortByName(): void {
+        this.contacts.sort((a, b) =>
+            a.getFullName().localeCompare(b.getFullName())
+        );
     }
 }

@@ -36,4 +36,17 @@ export class Person {
         if (!other) return false;
         return this.getFullName().toLowerCase() === other.getFullName().toLowerCase();
     }
+
+    // UC11 - override toString
+    toString(): string {
+        return (
+            `${this.getFullName()}\n` +
+            `  Address : ${this.address}\n` +
+            `  City    : ${this.city}\n` +
+            `  State   : ${this.state}\n` +
+            `  Zip     : ${this.zip}\n` +
+            `  Phone   : ${this.phone}\n` +
+            `  Email   : ${this.email}`
+        );
+    }
 }
