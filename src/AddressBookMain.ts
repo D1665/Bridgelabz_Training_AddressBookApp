@@ -1,7 +1,20 @@
+// AddressBookMain.ts
+// Entry point. Just a console menu wired up to AddressBook / FileHandler.
+// Kept most of the logic in AddressBook.ts, this file is mostly IO + glue.
+
 import * as readlineSync from "readline-sync";
+import * as path from "path";
 import { Person } from "./Person";
 import { AddressBook } from "./AddressBook";
+import { FileHandler } from "./FileHandler";
 
+// NOTE: don't just use "addressbook_data.txt" here - that resolves against
+// process.cwd(), which changes depending on where you run "node" from.
+// Anchoring it to __dirname (dist/ after compile) and stepping up one level
+// means the file always lands in the project root no matter how you launch it.
+const DATA_FILE = path.join(__dirname, "..", "addressbook_data.txt");
+
+// UC6 - dictionary of address book name -> AddressBook
 const addressBooks: Map<string, AddressBook> = new Map();
 let currentBook: AddressBook | null = null;
 
@@ -13,19 +26,21 @@ function printWelcome() {
 
 function printMenu() {
     console.log("\n--- MENU ---");
-    console.log("1. Create a new Address Book");
-    console.log("2. Select an Address Book");
-    console.log("3. Add a Contact");
-    console.log("4. Add Multiple Contacts");
-    console.log("5. Edit a Contact");
-    console.log("6. Delete a Contact");
-    console.log("7. View All Contacts");
-    console.log("8. Search by City / State");
-    console.log("9. View Persons Grouped by City / State");
+    console.log("1.  Create a new Address Book");
+    console.log("2.  Select an Address Book");
+    console.log("3.  Add a Contact");
+    console.log("4.  Add Multiple Contacts");
+    console.log("5.  Edit a Contact");
+    console.log("6.  Delete a Contact");
+    console.log("7.  View All Contacts");
+    console.log("8.  Search by City / State");
+    console.log("9.  View Persons Grouped by City / State");
     console.log("10. Count Persons by City / State");
     console.log("11. Sort by Name");
     console.log("12. Sort by City / State / Zip");
-    console.log("0. Exit");
+    console.log("13. Save to File");
+    console.log("14. Load from File");
+    console.log("0.  Exit");
 }
 
 function requireCurrentBook(): boolean {
@@ -110,20 +125,6 @@ function addMultipleContacts() {
     console.log(`Done. Added ${added} contact(s).`);
 }
 
-function viewAllContacts() {
-    if (!requireCurrentBook()) return;
-    const contacts = currentBook!.getAll();
-    if (contacts.length === 0) {
-        console.log("Address book is empty.");
-        return;
-    }
-    console.log(`\n${currentBook!.name} - ${contacts.length} contact(s)`);
-    contacts.forEach((p, i) => {
-        console.log(`\n#${i + 1}`);
-        console.log(p.toString());
-    });
-}
-
 function editContact() {
     if (!requireCurrentBook()) return;
     const name = readlineSync.question("Enter the full name of the contact to edit: ").trim();
@@ -158,6 +159,20 @@ function deleteContact() {
     console.log(deleted ? "Deleted." : "Couldn't find that contact.");
 }
 
+function viewAllContacts() {
+    if (!requireCurrentBook()) return;
+    const contacts = currentBook!.getAll();
+    if (contacts.length === 0) {
+        console.log("Address book is empty.");
+        return;
+    }
+    console.log(`\n${currentBook!.name} - ${contacts.length} contact(s)`);
+    contacts.forEach((p, i) => {
+        console.log(`\n#${i + 1}`);
+        console.log(p.toString());
+    });
+}
+
 function searchByCityOrState() {
     if (!requireCurrentBook()) return;
     const type = readlineSync.question("Search by (city/state)? ").trim().toLowerCase();
@@ -175,6 +190,8 @@ function searchByCityOrState() {
     results.forEach(p => console.log("\n" + p.toString()));
 }
 
+// UC8 note: search can also go across ALL address books, not just the current
+// one. doing that here since it's basically the same code, just looping books
 function searchAcrossAllBooks() {
     const type = readlineSync.question("Search ACROSS ALL books by (city/state)? ").trim().toLowerCase();
     const value = readlineSync.question("Enter value: ").trim();
@@ -230,12 +247,48 @@ function sortByField() {
     viewAllContacts();
 }
 
+function saveToFile() {
+    if (addressBooks.size === 0) {
+        console.log("Nothing to save yet.");
+        return;
+    }
+    try {
+        FileHandler.saveToFile(DATA_FILE, addressBooks);
+        console.log(`Saved to ${DATA_FILE}`);
+    } catch (err) {
+        console.log("Something went wrong while saving: " + err);
+    }
+}
+
+function loadFromFile() {
+    try {
+        const loaded = FileHandler.loadFromFile(DATA_FILE);
+        if (loaded.size === 0) {
+            console.log("Nothing loaded (file missing or empty).");
+            return;
+        }
+        addressBooks.clear();
+        for (const [name, book] of loaded) {
+            addressBooks.set(name, book);
+        }
+        // just select the first one that comes back so the user can start
+        // working right away
+        currentBook = loaded.values().next().value ?? null;
+        console.log(`Loaded ${loaded.size} address book(s) from ${DATA_FILE}`);
+        if (currentBook) console.log(`Selected "${currentBook.name}"`);
+    } catch (err) {
+        console.log("Something went wrong while loading: " + err);
+    }
+}
+
 function main() {
     printWelcome();
+
     let running = true;
     while (running) {
         printMenu();
         const choice = readlineSync.question("\nChoose an option: ").trim();
+
         switch (choice) {
             case "1": createAddressBook(); break;
             case "2": selectAddressBook(); break;
@@ -254,6 +307,8 @@ function main() {
             case "10": countByCityOrState(); break;
             case "11": sortByName(); break;
             case "12": sortByField(); break;
+            case "13": saveToFile(); break;
+            case "14": loadFromFile(); break;
             case "0":
                 running = false;
                 console.log("Bye!");
